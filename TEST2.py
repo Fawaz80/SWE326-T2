@@ -129,6 +129,18 @@ class Admin(User):
             self.inventory.items.remove(item)
             print(f"{item.name} removed from inventory.")
 
+    # Duplicated code: Managing inventory items already exists in the Inventory class
+    def display_inventory_items(self):
+        for item in self.inventory.items:
+            print(f"{item.name} - ${item.price} [{item.category}]")  # Duplication of display_items method in Inventory
+
+    def search_inventory_item(self, item_name):
+        for item in self.inventory.items:
+            if item.name == item_name:
+                return item
+        print("Item not found.")  # Duplication of find_item method in Inventory
+        return None
+
 
 # Additional Features Leading to Increased Cyclomatic Complexity
 class CouponManager:
@@ -147,11 +159,29 @@ class CouponManager:
             return cart.calculate_total()
 
 
+class VIPUser(User):
+    def __init__(self, username, email):
+        super().__init__(username, email, "VIP")
+        self.balance = 2000
+
+    # Duplicated logic from User.checkout()
+    def checkout(self):
+        if not self.cart.is_empty():
+            self.payment.process_payment()
+            self.order_history.add_order(self.cart)
+            print(f"VIP User {self.username} received a special gift with their order!")  # Small variation
+        else:
+            print("Cart is empty.")
+
+    def view_vip_orders(self):
+        self.order_history.show_orders()  # Duplicated logic from User.view_order_history()
+
+
 # Main program logic
 if __name__ == "__main__":
     admin = Admin("admin1", "admin@example.com")
     admin.add_new_item("Tablet", 300, "Electronics")
-    admin.inventory.display_items()
+    admin.display_inventory_items()  # Duplicated method
 
     user = User("johndoe", "johndoe@example.com", "customer")
     inventory = Inventory()
@@ -171,8 +201,14 @@ if __name__ == "__main__":
 
     # Admin performs more inventory operations
     admin.remove_item("Tablet")
-    admin.inventory.display_items()
+    admin.display_inventory_items()  # Duplicated method
 
     # Using CouponManager to apply a coupon
     coupon_manager = CouponManager()
     coupon_manager.apply_coupon(user.cart, "SAVE10")
+
+    # VIP User checkout (has duplication of checkout logic)
+    vip_user = VIPUser("janedoe", "janedoe@example.com")
+    vip_user.add_item_to_cart(item)
+    vip_user.checkout()  # Duplicated checkout logic from User
+    vip_user.view_vip_orders()  # Duplicated view orders logic
